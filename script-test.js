@@ -117,7 +117,7 @@ async function loadChatData() {
     myArr.forEach(row => {
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
       //console.log(typeof member);
-      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")){
+      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")){
         countsByMember[member] = (countsByMember[member] || 0) + 1;
       }
 
@@ -175,7 +175,7 @@ async function loadChatData() {
   }
   */
 
-  function visualizeMessageCountByDateAndMember(myArr) {
+    function visualizeMessageCountByDateAndMember(myArr) {
     const countsByDateAndMember = {};
   
     // Initialize counts for all members and dates as 0
@@ -191,12 +191,14 @@ async function loadChatData() {
         countsByDateAndMember[member] = Object.values(row)[5];
       }*/
 
-
-      if (!countsByDateAndMember[date]) {
-        countsByDateAndMember[date] = {};
-      }
+      const excludedWords = ['加入', '結束', '收回訊息','通話','移除'];
+      if (!excludedWords.some(word => member.includes(word))) {
+        if (!countsByDateAndMember[date]) {
+          countsByDateAndMember[date] = {};
+        }
   
-      countsByDateAndMember[date][member] = 0;
+        countsByDateAndMember[date][member] = 0;
+      }
       
     });
   
@@ -204,8 +206,11 @@ async function loadChatData() {
     myArr.forEach(row => {
       const date = Object.values(row)[4];
       const member = Object.values(row)[5];
+      const excludedWords = ['加入', '結束', '收回訊息','通話','移除'];
   
-      countsByDateAndMember[date][member]++;
+      if (!excludedWords.some(word => member.includes(word))) {
+        countsByDateAndMember[date][member]++;
+      }
       //console.log(date, member, countsByDateAndMember[date][member]);
     });
   
