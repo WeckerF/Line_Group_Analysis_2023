@@ -1,6 +1,7 @@
 async function loadChatData() {
     //const response = await fetch('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/c3797620c969cd8f1c02d6b91b69a23af30826e4/for_GPT_read.csv');
-    const response = await fetch('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/main/for_GPT_read_test2.csv');
+    //const response = await fetch('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/main/for_GPT_read_test2.csv');
+    const response = await fetch('/for_GPT_read_test_old.csv');
     const data = await response.text();
     //console.log(data);
     console.log(typeof data);
