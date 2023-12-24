@@ -4,9 +4,9 @@ async function loadChatData() {
     const response = await fetch('./for_GPT_read_test_old.csv');
     const data = await response.text();
     //console.log(data);
-    console.log(typeof data);
+    //console.log(typeof data);
     const chatData = Papa.parse(data,{header: true});
-    console.log(chatData)
+    //console.log(chatData)
     //const rows = data.split('\n');
     //console.log(rows);
     //const headers = rows[0].split(',');
@@ -33,9 +33,9 @@ async function loadChatData() {
         myArr.push(val);
     });
     //console.log(myArr);
-    console.log("print value of myArr");
-    console.log(myArr[2]); 
-    console.log(Object.values(myArr[2])[5]); 
+    //console.log("print value of myArr");
+    //console.log(myArr[2]); 
+    //console.log(Object.values(myArr[2])[5]); 
     
     //print Member
     let all_member = [];
@@ -70,10 +70,11 @@ async function loadChatData() {
   
     const dates = Object.keys(countsByDate);
     const messageCounts = Object.values(countsByDate);
-    console.log("print date");
-    console.log(dates);
+    /*console.log("print date");
+    //console.log(dates);
     console.log("print count");
     console.log(messageCounts);
+    */
 
 
     const ctx = document.getElementById('messageCountByDateChart').getContext('2d');
