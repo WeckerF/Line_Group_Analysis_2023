@@ -44,20 +44,9 @@
     const memberChartID = 'messageCountByMemberChart';
     const backgroundColor = 'rgba(75, 192, 192, 0.2)';
     const borderColor = 'rgba(75, 192, 192, 1)';
-    //import Chart from 'chart.js/auto';
 
-/*
-    const chartRef = useRef<HTMLCanvasElement>(null);
-    const chartId = useRef<string | null>(null);
 
-    useEffect(() => {
-        if (chartId.current !== null) {
-        return;
-        }
-        const config = {...};
-        const chart = new Chart(chartRef.current, config);
-        chartId.current = chart.id;
-        }, []);*/
+
     // Initialize chart variables
     let barChart, lineChart1, lineChart2;
 
@@ -79,7 +68,7 @@
 
 
     function loadChatData(callback) {
-        fetch('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/main/for_GPT_read_test2.csv')
+        fetch('./for_GPT_read_test_old.csv')
         .then(response => response.text())
         .then(data => {
         let chatData = Papa.parse(data,{header: true});
@@ -165,8 +154,8 @@
     const members = Object.keys(countsByMember);
     const messageCounts = Object.values(countsByMember);
     //console.log("typeof: " + typeof(countsByMember));
-    console.log("Member: " + members);
-    console.log("Count: " + messageCounts);
+    //console.log("Member: " + members);
+    //console.log("Count: " + messageCounts);
 
     const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
     const sortedMessageCounts = sortedMembers.map(member => countsByMember[member]);
@@ -234,11 +223,6 @@
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
       //console.log("Date - Member print: " + date + member);
       //console.log(typeof member);
-      /*
-      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")){
-        //countsByMember[member] = (countsByMember[member] || 0) + 1;
-        countsByDateAndMember[member] = Object.values(row)[5];
-      }*/
 
       //const excludedWords = ['加入', '結束', '收回訊息','通話'];
       const excludedWordsRegex = /加入|結束|收回|通話|移除/;
@@ -356,35 +340,7 @@
     return colors;
   }
     // Function to update charts based on the selected date
-    /*
-  function updateCharts(datak, date) {
-      // Fetch the chat data for the selected date
-      // You can replace this with your own implementation to filter the chat data based on the selected date
-      //const filteredData = chatData.filter(row => row['Date_TW'] === date);
-    let filteredData = [];
-        //----Old Version
-    Object.values(datak).forEach(val => {
-        if(Object.values(val)[4] >date){filteredData.push(val);};
-        
-        });
 
-      // Update the data and redraw the charts
-      visualizeMessageCountByDate(filteredData);
-      visualizeMessageCountByDateAndMember(filteredData);
-      visualizeMessageCountByMember(filteredData);
-    }
-
-    loadChatData();
-
-    // Event listener for the date picker change event
-    document.getElementById('datePicker').addEventListener('change', function(event) {
-      const selectedDate = event.target.value;
-      //const datak = chatData.data;
-
-      // Call the function to update the charts based on the selected date
-      updateCharts(datak, selectedDate);
-    });
-    */
 
     loadChatData(function(myArr) {
     visualizeMessageCountByDate(myArr);
