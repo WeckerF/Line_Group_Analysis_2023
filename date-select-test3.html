@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Data Visualization</title>
+  <meta charset="utf-8" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    #title {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #ddbc7477; /* Set the background color as desired */
+      padding: 20px; /* Set the padding as desired */
+      font-size: 24px; /* Set the font size as desired */
+      font-weight: bold; /* Set the font weight as desired */
+    }
+
+    #chartContainer {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">小小世界聊天紀錄分析</div>
+  <div>
+    <label for="datePicker">選擇起始時間(晚於2023/01/14):</label><br>
+    <input type="date" id="datePicker" min="2023-01-14" max="2024-02-10">
+  </div>
+  <br><br><br><br>
+
+  <div id="chartContainer">
+    <canvas id="messageCountByDateChart"></canvas>
+    <canvas id="messageCountByMemberChart"></canvas>
+    <canvas id="messageCountByDateAndMemberChart"></canvas>
+  </div>
+  <br><br><br><br>
+  <script src="
+  https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js
+  "></script>
+  <script>
+    // Constants for the chart IDs and colors
+    const dateChartID = 'messageCountByDateChart';
+    const timeChartID = 'messageCountByDateAndMemberChart';
+    const memberChartID = 'messageCountByMemberChart';
+    const backgroundColor = 'rgba(75, 192, 192, 0.2)';
+    const borderColor = 'rgba(75, 192, 192, 1)';
+    //import Chart from 'chart.js/auto';
+
+/*
+    const chartRef = useRef<HTMLCanvasElement>(null);
+    const chartId = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (chartId.current !== null) {
+        return;
+        }
+        const config = {...};
+        const chart = new Chart(chartRef.current, config);
+        chartId.current = chart.id;
+        }, []);*/
+    // Initialize chart variables
+    let barChart, lineChart1, lineChart2;
+
+    function destroyCharts() {
+        if (barChart) {
+            barChart.destroy();
+            barChart = null;
+        }
+        if (lineChart1) {
+            lineChart1.destroy();
+            lineChart1 = null;
+        }
+        if (lineChart2) {
+            lineChart2.destroy();
+            lineChart2 = null;
+        }
+        }
+
+
+
+    function loadChatData(callback) {
+        fetch('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/main/for_GPT_read_test2.csv')
+        .then(response => response.text())
+        .then(data => {
+        let chatData = Papa.parse(data,{header: true});
+        let datak = chatData.data;  
+        let myArr = [];
+    //----Old Version
+        Object.values(datak).forEach(val => {
+            myArr.push(val);
+            //if(Object.values(val)[4] >'2023-09-27'){myArr.push(val);};
+        
+        });
+
+      // Call the provided callback function with the fetched chat data
+        callback(myArr);
+    })
+    .catch(error => {
+      console.error('Error fetching chat data:', error);
+    });
+}
+
+  function visualizeMessageCountByDate(myArr) {
+    const countsByDate = {};
+    myArr.forEach(row => {
+      const date = Object.values(row)[4];
+      countsByDate[date] = (countsByDate[date] || 0) + 1;
+    });
+  
+    const dates = Object.keys(countsByDate);
+    const messageCounts = Object.values(countsByDate);
+    console.log("print date");
+    console.log(dates);
+    console.log("print count");
+    console.log(messageCounts);
+
+
+    const ctx = document.getElementById('messageCountByDateChart').getContext('2d');
+    lineChart1 = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Message Count',
+            data: messageCounts,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 3,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+            },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+  
+
+  function visualizeMessageCountByMember(myArr) {
+    const countsByMember = {};
+    myArr.forEach(row => {
+      const member = Object.values(row)[5]; // Get the value from the "Member" column directly
+      //console.log(typeof member);
+      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")){
+        countsByMember[member] = (countsByMember[member] || 0) + 1;
+      }
+
+    });
+  
+    const members = Object.keys(countsByMember);
+    const messageCounts = Object.values(countsByMember);
+    //console.log("typeof: " + typeof(countsByMember));
+    console.log("Member: " + members);
+    console.log("Count: " + messageCounts);
+
+    const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
+    const sortedMessageCounts = sortedMembers.map(member => countsByMember[member]);
+    //console.log("count" + messageCounts);
+
+    const ctx = document.getElementById('messageCountByMemberChart').getContext('2d');
+    barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sortedMembers,
+        datasets: [
+          {
+            label: 'Message Count',
+            data: sortedMessageCounts,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Green color
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Member',
+              padding: { // Add padding to adjust the spacing
+                top: 10, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+              
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+              padding: { // Add padding to adjust the spacing
+                top: 10, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+
+            },
+            beginAtZero: true,
+          },
+          
+        },
+      },
+    });
+  }
+
+
+
+  function visualizeMessageCountByDateAndMember(myArr) {
+    const countsByDateAndMember = {};
+  
+    // Initialize counts for all members and dates as 0
+    myArr.forEach(row => {
+      const date = Object.values(row)[4];
+      //const member = row['Member'];
+      const member = Object.values(row)[5]; // Get the value from the "Member" column directly
+      //console.log("Date - Member print: " + date + member);
+      //console.log(typeof member);
+      /*
+      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")){
+        //countsByMember[member] = (countsByMember[member] || 0) + 1;
+        countsByDateAndMember[member] = Object.values(row)[5];
+      }*/
+
+      //const excludedWords = ['加入', '結束', '收回訊息','通話'];
+      const excludedWordsRegex = /加入|結束|收回|通話|移除/;
+      if (!excludedWordsRegex.test(member)) {
+        if (!countsByDateAndMember[date]) {
+          countsByDateAndMember[date] = {};
+        }
+  
+        countsByDateAndMember[date][member] = 0;
+      }
+      
+    });
+  
+    // Calculate counts for each member and date
+    myArr.forEach(row => {
+      const date = Object.values(row)[4];
+      const member = Object.values(row)[5];
+      //const excludedWords = ['加入', '結束', '收回訊息','通話'];
+      const excludedWordsRegex = /加入|結束|收回|通話|移除/;
+        
+      if (!excludedWordsRegex.test(member)) {
+        countsByDateAndMember[date][member]++;
+      }
+      //console.log(date, member, countsByDateAndMember[date][member]);
+    });
+  
+    const dateLabels = Object.keys(countsByDateAndMember);
+    console.log(dateLabels);
+    console.log(Object.values(countsByDateAndMember));
+    const memberCounts = {};
+  
+    // Prepare the member count data
+    Object.values(countsByDateAndMember).forEach(memberData => {
+      for (const member in memberData) {
+        if (!memberCounts[member]) {
+          memberCounts[member] = [];
+        }
+  
+        const messageCount = memberData[member];
+        memberCounts[member].push(messageCount);
+      }
+    });
+  
+    const ctx = document.getElementById('messageCountByDateAndMemberChart').getContext('2d');
+    const members = Object.keys(memberCounts);
+    const colors = generateColors(members.length);
+
+    Chart.defaults.font.size = 20;
+    lineChart2 = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dateLabels,
+        datasets: Object.keys(memberCounts).map((member, index) => ({
+          label: member,
+          data: memberCounts[member],
+          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Green color
+          borderColor: colors[index % colors.length],
+          borderWidth: 1.5,
+        })),
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Message Count by Date and Member',
+            font: {
+              size: 25, // Adjust the font size as desired
+              weight: 'bold', // Set the font weight as desired
+            },
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+            },
+            beginAtZero: true,
+          },
+        },
+        legend: {
+          display: true,
+          position: 'bottom', // Position the legend at the bottom
+          labels: {
+            font: {
+              size: 30, // Adjust the font size as desired
+            }
+          }
+        },
+        layout: {
+            padding: {
+              top: 50, // Adjust the top padding value between the chart and the title
+              bottom: 50, // Adjust the bottom padding value between the chart and the legend
+              left: 20,
+              right: 20,
+            },
+          },
+      },
+    });
+  }
+
+  function generateColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = (i / count) * 360;
+      const color = `hsl(${hue}, 100%, 50%)`;
+      colors.push(color);
+    }
+    return colors;
+  }
+    // Function to update charts based on the selected date
+    /*
+  function updateCharts(datak, date) {
+      // Fetch the chat data for the selected date
+      // You can replace this with your own implementation to filter the chat data based on the selected date
+      //const filteredData = chatData.filter(row => row['Date_TW'] === date);
+    let filteredData = [];
+        //----Old Version
+    Object.values(datak).forEach(val => {
+        if(Object.values(val)[4] >date){filteredData.push(val);};
+        
+        });
+
+      // Update the data and redraw the charts
+      visualizeMessageCountByDate(filteredData);
+      visualizeMessageCountByDateAndMember(filteredData);
+      visualizeMessageCountByMember(filteredData);
+    }
+
+    loadChatData();
+
+    // Event listener for the date picker change event
+    document.getElementById('datePicker').addEventListener('change', function(event) {
+      const selectedDate = event.target.value;
+      //const datak = chatData.data;
+
+      // Call the function to update the charts based on the selected date
+      updateCharts(datak, selectedDate);
+    });
+    */
+
+    loadChatData(function(myArr) {
+    visualizeMessageCountByDate(myArr);
+    visualizeMessageCountByMember(myArr);
+    visualizeMessageCountByDateAndMember(myArr);
+
+    // Event listener for the date picker change event
+    document.getElementById('datePicker').addEventListener('change', function(event) {
+    const selectedDate = event.target.value;
+    destroyCharts();
+
+    // Filter the chat data based on the selected date
+    //const filteredData = chatData.filter(row => row['Date_TW'] === selectedDate);
+    let filteredData = [];
+        //----Old Version
+    myArr.forEach(val => {
+        if(Object.values(val)[4] > selectedDate){filteredData.push(val);};
+        
+        });
+
+    // Update the charts with the filtered data
+    visualizeMessageCountByDate(filteredData);  
+    visualizeMessageCountByMember(filteredData);
+    visualizeMessageCountByDateAndMember(filteredData);
+  });
+});
+  </script>
+</body>
+</html>
