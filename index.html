@@ -4,6 +4,7 @@
   <title>Chat Data Visualization</title>
   <meta charset="utf-8" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/randomcolor/randomColor.min.js"></script>
   <style>
     #header {
      display: flex;
@@ -86,7 +87,7 @@
     <canvas id="messageCountByDateChart"></canvas>
     <canvas id="messageCountByMemberChart"></canvas>
     <canvas id="StickerCountByMemberChart"></canvas>
-    <canvas id="messageCountByWeekdayAndMemberChart"></canvas>
+    <canvas id="messageCountByWeekdayChart"></canvas>
     <canvas id="messageCountByDateAndMemberChart"></canvas>
   </div>
   <br><br><br><br>
@@ -546,125 +547,79 @@
 
   function visualizeWeekdayAndMember(myArr) {
     function weekdaytochinese(weekday){
-        weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        engdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         chinese_weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
-        return chinese_weekdays[weekdays.indexOf(weekday)];
+        return chinese_weekdays[engdays.indexOf(weekday)];
     }
-    const countsByDateAndMember = {};
-  
-    // Initialize counts for all members and dates as 0
-    myArr.forEach(row => {
-      const date = weekdaytochinese(Object.values(row)[2]);
-      const member = Object.values(row)[5]; // Get the value from the "Member" column directly
-      //console.log("weekday print: " + date);
-      //console.log(typeof member);
 
-      //const excludedWords = ['加入', '結束', '收回訊息','通話'];
-      const excludedWordsRegex = /加入|結束|收回|通話|移除/;
-      if (!excludedWordsRegex.test(member)) {
-        if (!countsByDateAndMember[date]) {
-          countsByDateAndMember[date] = {};
-        }
-  
-        countsByDateAndMember[date][member] = 0;
-      }
-      
-    });
-  
-    // Calculate counts for each member and date
-    myArr.forEach(row => {
-      const date = weekdaytochinese(Object.values(row)[2]);
-      const member = Object.values(row)[5];
-      //const excludedWords = ['加入', '結束', '收回訊息','通話'];
-      const excludedWordsRegex = /加入|結束|收回|通話|移除/;
-        
-      if (!excludedWordsRegex.test(member)) {
-        countsByDateAndMember[date][member]++;
-      }
-      //console.log(date, member, countsByDateAndMember[date][member]);
-    });
-  
-    const dateLabels = Object.keys(countsByDateAndMember);
-    console.log(dateLabels);
-    //console.log(Object.values(countsByDateAndMember));
-    const memberCounts = {};
-  
-    // Prepare the member count data
-    Object.values(countsByDateAndMember).forEach(memberData => {
-      for (const member in memberData) {
-        if (!memberCounts[member]) {
-          memberCounts[member] = [];
-        }
-  
-        const messageCount = memberData[member];
-        memberCounts[member].push(messageCount);
-      }
-    });
-  
-    const ctx = document.getElementById('messageCountByWeekdayAndMemberChart').getContext('2d');
-    const members = Object.keys(memberCounts);
-    const colors = generateColors(members.length);
+    const countsByWeekdayAndMember = {};
+    const weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']; // Sort the weekdays in the desired order
 
-    Chart.defaults.font.size = 20;
-    lineChart3 = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dateLabels,
-        datasets: Object.keys(memberCounts).map((member, index) => ({
-          label: member,
-          data: memberCounts[member],
-          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Green color
-          borderColor: colors[index % colors.length],
-          borderWidth: 1.5,
-        })),
-      },
-      options: {
-        plugins: {
+    myArr.forEach(row => {
+    const weekday = weekdaytochinese(Object.values(row)[2]);
+    console.log(weekday);
+    const member = Object.values(row)[5];
+    console.log(member);
+
+    if (!countsByWeekdayAndMember[member]) {
+      countsByWeekdayAndMember[member] = {};
+      weekdays.forEach(day => {
+        countsByWeekdayAndMember[member][day] = 0;
+      });
+    }
+    countsByWeekdayAndMember[member][weekday]++;
+  });
+
+  const datasets = Object.keys(countsByWeekdayAndMember).map(member => {
+    const data = weekdays.map(weekday => countsByWeekdayAndMember[member][weekday]);
+    return {
+      label: member,
+      data: data,
+      borderColor: randomColor(), // Generate a random color for each member line
+      borderWidth: 1.3,
+      fill: false,
+    };
+  });
+
+  const ctx = document.getElementById('messageCountByWeekdayChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: weekdays,
+      datasets: datasets,
+    },
+    options: {
+      scales: {
+        x: {
           title: {
             display: true,
-            text: ['星期訊息統計','點選下方方格可以選取要去除的線'],
+            text: 'Weekday',
+          },
+          ticks: {
+            // Adjust tick font size and baseline alignment as desired
             font: {
-              size: 25, // Adjust the font size as desired
-              weight: 'bold', // Set the font weight as desired
+              size: 12,
+              weight: 'bold',
             },
           },
         },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Date',
-            },
+        y: {
+          title: {
+            display: true,
+            text: 'Message Count',
           },
-          y: {
-            title: {
-              display: true,
-              text: 'Message Count',
-            },
-            beginAtZero: true,
-          },
-        },
-        legend: {
-          display: true,
-          position: 'bottom', // Position the legend at the bottom
-          labels: {
+          beginAtZero: true,
+          ticks: {
+            // Adjust tick font size as desired
             font: {
-              size: 30, // Adjust the font size as desired
-            }
-          }
-        },
-        layout: {
-            padding: {
-              top: 50, // Adjust the top padding value between the chart and the title
-              bottom: 50, // Adjust the bottom padding value between the chart and the legend
-              left: 10,
-              right: 10,
+              size: 12,
             },
           },
+        },
       },
-    });
-  }
-
+    },
+  });
+}
 
   function generateColors(count) {
     const colors = [];
