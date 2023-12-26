@@ -557,22 +557,23 @@
 
     myArr.forEach(row => {
     const weekday = weekdaytochinese(Object.values(row)[2]);
-    //console.log(weekday);
+    console.log(weekday);
     const member = Object.values(row)[5];
-    //console.log(member);
+    console.log(member);
 
     const excludedWordsRegex = /加入|結束|收回|通話|移除/;  
 
-    if (!countsByWeekdayAndMember[member]) {
-      countsByWeekdayAndMember[member] = {};
-      weekdays.forEach(day => {
-        countsByWeekdayAndMember[member][day] = 0;
-      });
-    }
+    if (!excludedWordsRegex.test(member)){
+        if (!countsByWeekdayAndMember[member]) {
+            countsByWeekdayAndMember[member] = {};
+            weekdays.forEach(day => {
+            countsByWeekdayAndMember[member][day] = 0;
+            });
+        }}
     if (!excludedWordsRegex.test(member)){
         countsByWeekdayAndMember[member][weekday]++;
-    }
-  });
+        }
+    });
     
   const datasets = Object.keys(countsByWeekdayAndMember).map(member => {
     const data = weekdays.map(weekday => countsByWeekdayAndMember[member][weekday]);
