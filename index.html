@@ -511,12 +511,16 @@
         plugins: {
           title: {
             display: true,
-            text: ['Message Count by Date and Member','點選下方方格可以選取要去除的線'],
+            text: ['Message Count by Date and Member'],
             font: {
               size: 25, // Adjust the font size as desired
               weight: 'bold', // Set the font weight as desired
             },
           },
+          subtitle: {
+              display: true,
+              text: '點選下方方格可以選取要去除的線'
+            }
         },
         scales: {
           x: {
@@ -544,8 +548,8 @@
         },
         layout: {
             padding: {
-              top: 50, // Adjust the top padding value between the chart and the title
-              bottom: 50, // Adjust the bottom padding value between the chart and the legend
+              top: 10, // Adjust the top padding value between the chart and the title
+              bottom: 10, // Adjust the bottom padding value between the chart and the legend
               left: 10,
               right: 10,
             },
@@ -603,6 +607,21 @@
       datasets: datasets,
     },
     options: {
+      plugins: {
+        title: {
+          display: true,
+          text: ['星期訊息折線圖'],
+          font: {
+            size: 25, // Adjust the font size as desired
+            weight: 'bold', // Set the font weight as desired
+            },
+          },
+          subtitle: {
+              display: true,
+              text: '點選下方方格可以選取要去除的線'
+            }
+        },
+
       scales: {
         x: {
           title: {
