@@ -436,7 +436,8 @@
       const date = Object.values(row)[4];
       //const member = row['Member'];
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
-      //console.log("Date - Member print: " + date + member);
+      if(member === "鬧鐘"){
+      console.log("Date - Member print: " + date + member);}
       //console.log(typeof member);
 
       //const excludedWords = ['加入', '結束', '收回訊息','通話'];
