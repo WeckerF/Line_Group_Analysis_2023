@@ -436,7 +436,7 @@
       const date = Object.values(row)[4];
       //const member = row['Member'];
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
-      if(member === "鬧鐘"){
+      if(member == "鬧鐘"){
       console.log("Date - Member print: " + date + member);}
       //console.log(typeof member);
 
@@ -558,9 +558,9 @@
 
     myArr.forEach(row => {
     const weekday = weekdaytochinese(Object.values(row)[2]);
-    console.log(weekday);
+    //console.log(weekday);
     const member = Object.values(row)[5];
-    console.log(member);
+    //console.log(member);
 
     const excludedWordsRegex = /加入|結束|收回|通話|移除/;  
 
