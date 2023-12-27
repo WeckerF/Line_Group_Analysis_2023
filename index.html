@@ -6,6 +6,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/randomcolor/randomColor.min.js"></script>
   <style>
+    body {
+      background-color: rgb(242, 195, 102);
+    }
     #header {
      display: flex;
      justify-content: space-between;
@@ -60,6 +63,36 @@
         justify-content: center;
         align-items: center;
     }
+    #messageCountByDateChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
+    #messageCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
+    #averageWordCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
+    #StickerCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
+    #messageCountByWeekdayChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
+    #messageCountByDateAndMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;        
+    }
   </style>
 </head>
 <body>
@@ -86,6 +119,7 @@
   <div id="chartContainer">
     <canvas id="messageCountByDateChart"></canvas>
     <canvas id="messageCountByMemberChart"></canvas>
+    <canvas id="averageWordCountByMemberChart"></canvas>
     <canvas id="StickerCountByMemberChart"></canvas>
     <canvas id="messageCountByWeekdayChart"></canvas>
     <canvas id="messageCountByDateAndMemberChart"></canvas>
@@ -103,7 +137,7 @@
     const borderColor = 'rgba(75, 192, 192, 1)';
 
     // Initialize chart variables
-    let barChart, barChart2, lineChart1, lineChart2, lineChart3;
+    let barChart, barChart2, barChart3, lineChart1, lineChart2, lineChart3;
 
     function destroyCharts() {
         if (barChart) {
@@ -113,6 +147,10 @@
         if (barChart2) {
             barChart2.destroy();
             barChart2 = null;
+        }
+        if (barChart3) {
+            barChart3.destroy();
+            barChart3 = null;
         }
         if (lineChart1) {
             lineChart1.destroy();
@@ -548,11 +586,11 @@
           }
         },
         layout: {
-            padding: {
-              top: 10, // Adjust the top padding value between the chart and the title
-              bottom: 10, // Adjust the bottom padding value between the chart and the legend
-              left: 10,
-              right: 10,
+          padding: {
+            top: 10, // Adjust the top padding value between the chart and the title
+            bottom: 10, // Adjust the bottom padding value between the chart and the legend
+            left: 10,
+            right: 10,
             },
           },
       },
@@ -655,6 +693,89 @@
   });
 }
 
+  function visualizeAvrWordCountByMember(myArr) {
+    const countsByMember = {};
+    const wordCountsByMember = {}; // Object to store word counts
+
+    myArr.forEach(row => {
+        const member = Object.values(row)[5];
+        const text = Object.values(row)[6]; // Get the value from the "Text" column directly
+
+        if (member !== undefined) {
+        if (!countsByMember[member]) {
+            countsByMember[member] = 0;
+            wordCountsByMember[member] = 0; // Initialize word count to 0
+        }
+
+        if (!member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")) {
+            if (!member.includes("http")){
+                countsByMember[member]++;
+                // Calculate the word count by splitting the text by whitespace and counting the number of words
+                wordCountsByMember[member] += text.trim().length;       
+            }
+        }
+        }
+    });
+
+            const members = Object.keys(countsByMember);
+            const messageCounts = Object.values(countsByMember);
+            const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / messageCounts[members.indexOf(member)]));
+
+            console.log("Member: " + members);
+            console.log("Count: " + messageCounts);
+            console.log("Average Word Count: " + avgWordCounts);
+            const sortedMembers = members.sort((a, b) => wordCountsByMember[b] - wordCountsByMember[a]);
+            const sortedWordCounts = sortedMembers.map(member => wordCountsByMember[member]);
+
+        const ctx = document.getElementById('averageWordCountByMemberChart').getContext('2d');
+        barChart3 = new Chart(ctx, {
+            type: 'bar',
+            data: {
+            labels: sortedMembers,
+            datasets: [
+                {
+                label: '每則訊息平均字數',
+                data: sortedWordCounts,
+                backgroundColor: 'rgba(192,75,75, 0.2)', // Green color
+                borderColor: 'rgba(192,75,75, 1)',
+                borderWidth: 1,
+                },
+            ],
+            },
+            options: {
+            plugins: {
+                title: {
+                display: true,
+                text: 'Average Word Count per Member',
+                font: {
+                    size: 25, // Adjust the font size as desired
+                    weight: 'bold', // Set the font weight as desired
+                },
+                },
+                subtitle: {
+                display: true,
+                text: '不包含網址'
+                }
+            },
+            scales: {
+                x: {
+                title: {
+                    display: true,
+                    text: 'Member',
+                },
+                },
+                y: {
+                title: {
+                    display: true,
+                    text: 'Average Word Count',
+                },
+                beginAtZero: true,
+                },
+            },
+            },
+        });
+        }
+    
   function generateColors(count) {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -672,6 +793,7 @@
     visualizeMessageCountByDateAndMember(myArr);
     visualizeMessageCountSticker(myArr);
     visualizeWeekdayAndMember(myArr);
+    visualizeAvrWordCountByMember(myArr)
 
     // Event listener for the date picker change event
     document.getElementById('datePicker').addEventListener('change', function(event) {
@@ -692,7 +814,8 @@
     visualizeMessageCountByMember(filteredData);
     visualizeMessageCountByDateAndMember(filteredData);
     visualizeMessageCountSticker(filteredData);
-    visualizeWeekdayAndMember(filteredData)
+    visualizeWeekdayAndMember(filteredData);
+    visualizeAvrWordCountByMember(filteredData)
   });
 });
   </script>
