@@ -546,7 +546,7 @@
         datasets: datasets,
       },
       options: {
-        aspectRatio: 1.7,
+        aspectRatio: 1.5,
         plugins: {
           title: {
             display: true,
@@ -717,15 +717,19 @@
         }
     });
 
-            const members = Object.keys(countsByMember);
-            const messageCounts = Object.values(countsByMember);
-            const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / messageCounts[members.indexOf(member)]));
+        const members = Object.keys(countsByMember);
+        const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
 
-            console.log("Member: " + members);
-            console.log("Count: " + messageCounts);
-            console.log("Average Word Count: " + avgWordCounts);
-            const sortedMembers = members.sort((a, b) => wordCountsByMember[b] - wordCountsByMember[a]);
-            const sortedWordCounts = sortedMembers.map(member => wordCountsByMember[member]);
+        const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
+        const sortedAvgWordCounts = sortedMembers.map(member => avgWordCounts[members.indexOf(member)]);
+        console.log("Member: " + members);
+        console.log("Total Count: " + Object.values(countsByMember));
+        console.log("Average Word Count: " + sortedAvgWordCounts);
+        //console.log("Member: " + members);
+        //console.log("Count: " + messageCounts);
+        //console.log("Average Word Count: " + avgWordCounts);
+        //const sortedMembers = members.sort((a, b) => wordCountsByMember[b] - wordCountsByMember[a]);
+        //const sortedWordCounts = sortedMembers.map(member => wordCountsByMember[member]);
 
         const ctx = document.getElementById('averageWordCountByMemberChart').getContext('2d');
         barChart3 = new Chart(ctx, {
@@ -735,7 +739,7 @@
             datasets: [
                 {
                 label: '每則訊息平均字數',
-                data: sortedWordCounts,
+                data: sortedAvgWordCounts,
                 backgroundColor: 'rgba(192,75,75, 0.2)', // Green color
                 borderColor: 'rgba(192,75,75, 1)',
                 borderWidth: 1,
