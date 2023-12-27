@@ -702,18 +702,19 @@
         const text = Object.values(row)[6]; // Get the value from the "Text" column directly
 
         if (member !== undefined) {
-        if (!countsByMember[member]) {
-            countsByMember[member] = 0;
-            wordCountsByMember[member] = 0; // Initialize word count to 0
-        }
+            if (!member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")){
+                if (!countsByMember[member]) {
+                    countsByMember[member] = 0;
+                    wordCountsByMember[member] = 0; // Initialize word count to 0
+        }}
 
-        if (!member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")) {
-            if (!member.includes("http")){
-                countsByMember[member]++;
-                // Calculate the word count by splitting the text by whitespace and counting the number of words
-                wordCountsByMember[member] += text.trim().length;       
+            if (!member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")) {
+                if (!text.includes("http")){
+                    countsByMember[member]++;
+                    // Calculate the word count by splitting the text by whitespace and counting the number of words
+                    wordCountsByMember[member] += text.trim().length;       
+                }
             }
-        }
         }
     });
 
