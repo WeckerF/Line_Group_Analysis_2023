@@ -26,7 +26,7 @@
       display: flex;
       margin-right: auto;
       margin-left: auto;
-      font-size: 30px; /* Set the font size as desired */
+      font-size: 38px; /* Set the font size as desired */
       font-weight: bold; /* Set the font weight as desired */
     }
 
@@ -46,6 +46,7 @@
       justify-content: center;
       align-items: center;
       margin-bottom: 20px;
+      font-size: 20px;
     }
 
     #datePickerBlock {
@@ -62,6 +63,7 @@
         text-align: center;
         justify-content: center;
         align-items: center;
+        font-size: 20px;
     }
     #messageCountByDateChart{
         border-radius: 20px;
@@ -739,7 +741,7 @@
             labels: sortedMembers,
             datasets: [
                 {
-                label: '每則訊息平均字數',
+                label: '平均字數',
                 data: sortedAvgWordCounts,
                 backgroundColor: 'rgba(192,75,75, 0.2)', // Green color
                 borderColor: 'rgba(192,75,75, 1)',
@@ -751,7 +753,7 @@
             plugins: {
                 title: {
                 display: true,
-                text: 'Average Word Count per Member',
+                text: '每則訊息平均字數',
                 font: {
                     size: 25, // Adjust the font size as desired
                     weight: 'bold', // Set the font weight as desired
