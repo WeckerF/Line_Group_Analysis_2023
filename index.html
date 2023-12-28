@@ -714,7 +714,8 @@
                 if (!text.includes("http")){
                     countsByMember[member]++;
                     // Calculate the word count by splitting the text by whitespace and counting the number of words
-                    wordCountsByMember[member] += text.trim().length;       
+                    wordCountsByMember[member] += text.trim().length; 
+                    if (member === "123"){console.log("count: " + countsByMember[member] + "wordcount" + wordCountsByMember[member])}; 
                 }
             }
         }
