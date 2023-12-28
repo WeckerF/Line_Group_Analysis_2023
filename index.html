@@ -722,6 +722,8 @@
     });
 
         const members = Object.keys(countsByMember);
+        console.log("Words: " + wordCountsByMember["123"]);
+        console.log("messages: " + countsByMember["123"]);
         const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
 
         const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
