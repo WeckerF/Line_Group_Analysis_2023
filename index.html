@@ -267,7 +267,7 @@
     myArr.forEach(row => {
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
       //console.log(typeof member);
-      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")){
+      if (!member.includes("Auto-reply") && member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")){
         countsByMember[member] = (countsByMember[member] || 0) + 1;
       }
 
