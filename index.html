@@ -727,8 +727,9 @@
         const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
 
         const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
-        const sortedAvgWordCounts = sortedMembers.map(member => avgWordCounts[members.indexOf(member)]);
-        console.log("Member: " + members);
+        const sortedAvgWordCounts = sortedMembers.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
+  
+        console.log("Member: " + sortedMembers);
         console.log("Total Count: " + Object.values(countsByMember));
         console.log("Average Word Count: " + sortedAvgWordCounts);
         //console.log("Member: " + members);
