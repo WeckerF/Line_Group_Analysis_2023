@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>小小世界LINE紀錄統計</title>
+  <meta charset="utf-8" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/randomcolor/randomColor.min.js"></script>
+  <style>
+    body {
+      background-color: rgb(237, 221, 212);
+    }
+    #header {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     background-color: #ddbc7477; /* Set the background color as desired */
+     padding: 20px; /* Set the padding as desired */
+
+    }
+
+    #author {
+      font-size: 16px; /* Adjust the font size as desired */
+
+    }
+    #title {
+      display: flex;
+      margin-right: auto;
+      margin-left: auto;
+      font-size: 38px; /* Set the font size as desired */
+      font-weight: bold; /* Set the font weight as desired */
+    }
+
+    #chartContainer {
+      text-align: center;
+      margin-top: 40px; /* Adjust the top margin as desired */
+      margin-bottom: 40px; /* Adjust the bottom margin as desired */
+      padding: 10px;
+      
+    }
+    /*canvas#messageCountByMemberChart {
+        background-color: rgba(241, 232, 163, 0.447);
+    }*/
+
+    #datePickerContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /*margin-bottom: 20px;*/
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    #datePickerBlock {
+      background-color: #d5c8c1; /* Set the desired background color */
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #datePicker {
+      width: 200px; /* Adjust the width as desired */
+      padding: 6px; /* Adjust padding as desired */
+      font-size: 15px; /* Adjust font size as desired */
+    }
+    #datePickerEnd {
+      width: 200px; /* Adjust the width as desired */
+      padding: 6px; /* Adjust padding as desired */
+      font-size: 15px; /* Adjust font size as desired */
+    }
+    #dateDescription {
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+    }
+    #confirmbtn {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    #cfbutton {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #0b1442; /* Set your desired color */
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 20px;
+    }
+    #messageCountByDateChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+    #messageCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+    #averageWordCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+    #StickerCountByMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+    #messageCountByWeekdayChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+    #messageCountByDateAndMemberChart{
+        border-radius: 20px;
+        border: solid 3px rgba(158, 194, 214, 1);
+        background: white;        
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <div id="title">2023小小世界聊天紀錄統計</div>
+    <div id="author">作者: 鬧鐘</div>
+  </div>
+
+  <div id="datePickerContainer">
+    <div id="datePickerBlock">
+        <label for="datePicker">選擇統計起始日期 (初始及最小值為2023/01/14): </label>
+        <input type="date" id="datePicker" min="2023-01-14" max="2023-12-31" value="2023-01-14">
+        <label for="datePickerEnd">選擇統計結束日期 (初始及最小值為2023/12/31): </label>
+        <input type="date" id="datePickerEnd" min="2023-01-14" max="2023-12-31" value="2023-12-31">
+    </div>   
+  </div>
+
+    <div id = "confirmbtn">
+        <button id = "cfbutton">確認日期</button>
+    </div>
+
+  <div id="dateDescription">
+    <p> 統計範圍:
+        <span id="startdate">2023-01-14</span>
+        <span> ~ </span>
+        <span id="enddate">2023-12-30</span><br>
+        <span>聊天天數: </span>
+        <span id="num_date"></span><br>
+        <span>期間發言成員: </span>
+        <span id="showMem"></span>
+    </p>
+  </div>
+  <br><br><br><br>
+
+  <div id="chartContainer">
+    <canvas id="messageCountByDateChart"></canvas><br>
+    <canvas id="messageCountByMemberChart"></canvas><br>
+    <canvas id="averageWordCountByMemberChart"></canvas><br>
+    <canvas id="StickerCountByMemberChart"></canvas><br>
+    <canvas id="messageCountByWeekdayChart"></canvas><br>
+    <canvas id="messageCountByDateAndMemberChart"></canvas>
+  </div>
+  <br><br><br><br>
+  <script src="
+  https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js
+  "></script>
+  <script>
+    // Constants for the chart IDs and colors
+    const dateChartID = 'messageCountByDateChart';
+    const timeChartID = 'messageCountByDateAndMemberChart';
+    const memberChartID = 'messageCountByMemberChart';
+    const backgroundColor = 'rgba(75, 192, 192, 0.2)';
+    const borderColor = 'rgba(75, 192, 192, 1)';
+
+    // Initialize chart variables
+    let barChart, barChart2, barChart3, lineChart1, lineChart2, lineChart3;
+
+    function destroyCharts() {
+        if (barChart) {
+            barChart.destroy();
+            barChart = null;
+        }
+        if (barChart2) {
+            barChart2.destroy();
+            barChart2 = null;
+        }
+        if (barChart3) {
+            barChart3.destroy();
+            barChart3 = null;
+        }
+        if (lineChart1) {
+            lineChart1.destroy();
+            lineChart1 = null;
+        }
+        if (lineChart2) {
+            lineChart2.destroy();
+            lineChart2 = null;
+        }
+        if (lineChart3) {
+            lineChart3.destroy();
+            lineChart3 = null;
+        }
+        }
+
+
+
+
+    function loadChatData(callback) {
+        //('https://raw.githubusercontent.com/WeckerF/Line_Group_Analysis_2023/main/for_GPT_read_test2.csv')
+        fetch('./for_GPT_read_test_old.csv')
+        .then(response => response.text())
+        .then(data => {
+        let chatData = Papa.parse(data,{header: true});
+        let datak = chatData.data;  
+        let myArr = [];
+        //Old Version
+        Object.values(datak).forEach(val => {
+            myArr.push(val);
+        
+        });
+
+      // Call the provided callback function with the fetched chat data
+        callback(myArr);
+    })
+    .catch(error => {
+      console.error('Error fetching chat data:', error);
+    });
+}
+
+  function visualizeMessageCountByDate(myArr) {
+    const countsByDate = {};
+    myArr.forEach(row => {
+      const date = Object.values(row)[4];
+      countsByDate[date] = (countsByDate[date] || 0) + 1;
+    });
+  
+    const dates = Object.keys(countsByDate);
+    const messageCounts = Object.values(countsByDate);
+    //console.log("print date");
+    //console.log(dates);
+    //console.log("print count");
+    //console.log(messageCounts);
+
+
+    const ctx = document.getElementById('messageCountByDateChart').getContext('2d');
+    lineChart1 = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Message Count',
+            data: messageCounts,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 3,
+          },
+        ],
+      },
+      options: {
+        aspectRatio: 1.5,
+        plugins: {
+          title: {
+            display: true,
+            text: '群組總訊息數趨勢',
+            font: {
+              size: 25, // Adjust the font size as desired
+              weight: 'bold', // Set the font weight as desired
+            },
+          },
+        },
+
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: '日期',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+            },
+            beginAtZero: true,
+          },
+        },
+        layout: {
+            padding: {
+              top: 20, // Adjust the top padding value between the chart and the title
+              bottom: 50, // Adjust the bottom padding value between the chart and the legend
+              left: 10,
+              right: 10,
+            },
+          },
+      },
+    });
+  }
+  
+
+  function visualizeMessageCountByMember(myArr) {
+    const countsByMember = {};
+    myArr.forEach(row => {
+      const member = Object.values(row)[5]; // Get the value from the "Member" column directly
+      //console.log(typeof member);
+      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")&& !member.includes("Auto-reply")){
+        countsByMember[member] = (countsByMember[member] || 0) + 1;
+      }
+
+    });
+  
+    const members = Object.keys(countsByMember);
+    const messageCounts = Object.values(countsByMember);
+    //console.log("typeof: " + typeof(countsByMember));
+
+    const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
+    const sortedMessageCounts = sortedMembers.map(member => countsByMember[member]);
+    //console.log("count" + messageCounts);
+
+    const ctx = document.getElementById('messageCountByMemberChart').getContext('2d');
+    barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sortedMembers,
+        datasets: [
+          {
+            label: 'Message Count',
+            data: sortedMessageCounts,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Green color
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        aspectRatio: 1.5,
+        plugins: {
+          title: {
+            display: true,
+            text: '成員訊息數量圖',
+            font: {
+              size: 25, // Adjust the font size as desired
+              weight: 'bold', // Set the font weight as desired
+            },
+          },
+        },
+
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: '成員名稱',
+              padding: { // Add padding to adjust the spacing
+                top: 15, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+              
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+              padding: { // Add padding to adjust the spacing
+                top: 10, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+
+            },
+            beginAtZero: true,
+          },
+          
+        },
+        legend: {
+          display: true,
+          position: 'bottom', // Position the legend at the bottom
+          labels: {
+            font: {
+              size: 30, // Adjust the font size as desired
+            }
+          }
+        },
+        layout: {
+            padding: {
+              top: 50, // Adjust the top padding value between the chart and the title
+              bottom: 50, // Adjust the bottom padding value between the chart and the legend
+              left: 10,
+              right: 10,
+            },
+          },
+
+
+      },
+    });
+  }
+
+  function visualizeMessageCountSticker(myArr) {
+    const Stickercount = {};
+    myArr.forEach(row => {
+      const member = Object.values(row)[5]; // Get the value from the "Member" column directly
+      const textsticker = Object.values(row)[6];
+      //console.log(typeof member);
+      if (member != undefined && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話")&& !member.includes("移除")&& !member.includes("結束")){
+        if(textsticker === "[貼圖]"){
+            Stickercount[member] = (Stickercount[member] || 0) + 1;}
+        
+      }
+
+    });
+  
+    const members = Object.keys(Stickercount);
+    const messageCounts = Object.values(Stickercount);
+    //console.log("typeof: " + typeof(countsByMember));
+    //console.log("Member: " + members);
+    //console.log("Count: " + messageCounts);
+
+    const sortedMembers = members.sort((a, b) => Stickercount[b] - Stickercount[a]);
+    const sortedMessageCounts = sortedMembers.map(member => Stickercount[member]);
+    //console.log("count" + messageCounts);
+
+    const ctx = document.getElementById('StickerCountByMemberChart').getContext('2d');
+    barChart2 = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sortedMembers,
+        datasets: [
+          {
+            label: 'Sticker Count',
+            data: sortedMessageCounts,
+            backgroundColor: 'rgba(134, 197, 134, 0.8)', // Green color
+            borderColor: 'rgba(134, 197, 134, 1)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        aspectRatio: 1.7,
+        plugins: {
+          title: {
+            display: true,
+            text: '成員貼圖數量圖',
+            font: {
+              size: 25, // Adjust the font size as desired
+              weight: 'bold', // Set the font weight as desired
+            },
+          },
+        },
+
+
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: '成員',
+              padding: { // Add padding to adjust the spacing
+                top: 15, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+              
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Sticker Count',
+              padding: { // Add padding to adjust the spacing
+                top: 10, // Adjust top padding as desired
+                bottom: 10, // Adjust bottom padding as desired
+                right: 15,
+                left: 15,
+              },
+
+            },
+            beginAtZero: true,
+          },
+          
+        },
+        legend: {
+          display: true,
+          position: 'bottom', // Position the legend at the bottom
+          labels: {
+            font: {
+              size: 30, // Adjust the font size as desired
+            }
+          }
+        },
+        layout: {
+            padding: {
+              top: 50, // Adjust the top padding value between the chart and the title
+              bottom: 50, // Adjust the bottom padding value between the chart and the legend
+              left: 10,
+              right: 10,
+            },
+          },
+
+
+      },
+    });
+  }
+
+
+
+  function visualizeMessageCountByDateAndMember(myArr) {
+    //Get unique Member nameset
+    const excludedWordsRegex = /加入|結束|收回|通話|移除/;
+    let all_member = [];
+    myArr.forEach(val => {
+        if (!excludedWordsRegex.test(Object.values(val)[5])){
+            if (Object.values(val)[5] !== undefined){
+                all_member.push(Object.values(val)[5]);}
+            }
+      });
+    
+    const uniquesMember = [...new Set(all_member)];
+    console.log(uniquesMember);
+    document.getElementById("showMem").innerHTML = uniquesMember;
+
+    //const dateLabels = [];
+    let dateLabels = [];
+    myArr.forEach(val => {
+        if (!excludedWordsRegex.test(Object.values(val)[4])){
+            if (Object.values(val)[4] !== undefined){
+                dateLabels.push(Object.values(val)[4]);}
+            }
+      });
+    const uniquesdateLabels = [...new Set(dateLabels)];
+    const num_dates = uniquesdateLabels.length;
+    document.getElementById("num_date").innerHTML = num_dates;
+    console.log(uniquesdateLabels);    
+
+    const countsByDateAndMember = {};
+ 
+    // Initialize counts for all members and dates as 0
+    myArr.forEach(row => {
+      const date = Object.values(row)[4];
+      const member = Object.values(row)[5];                     // Get the value from the "Member" column directly
+      /*if(member == "鬧鐘"){
+      console.log("Date - Member print: " + date + member);}*/
+      //console.log(typeof member);      
+      //console.log("Date - Member print: " + date + member);
+
+      const excludedWordsRegex = /加入|結束|收回|通話|移除/;
+      if (!excludedWordsRegex.test(member)) {
+        if (date !== undefined) { 
+            if (!countsByDateAndMember[member]) {
+                countsByDateAndMember[member] = {};
+            }
+            if (!countsByDateAndMember[member][date]) {
+                countsByDateAndMember[member][date] = 0;
+            }
+
+
+            countsByDateAndMember[member][date]++;
+            //console.log("print date member" + date + member + countsByDateAndMember[member][date]);
+      }}
+
+
+    });
+  
+
+  
+    const datasets = Object.keys(countsByDateAndMember).map(member => {
+    const data = uniquesdateLabels.map(date => countsByDateAndMember[member][date]);
+    return {
+      label: member,
+      data: data,
+      borderColor: randomColor(), // Generate a random color for each member line
+      borderWidth: 1.5,
+      fill: false,
+    };
+  });
+
+
+    const ctx = document.getElementById('messageCountByDateAndMemberChart').getContext('2d');
+    //const members = Object.keys(memberCounts);
+    //const colors = generateColors(members.length);
+
+    Chart.defaults.font.size = 20;
+    lineChart2 = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: uniquesdateLabels,
+        datasets: datasets,
+      },
+      options: {
+        aspectRatio: 1.3,
+        plugins: {
+          title: {
+            display: true,
+            text: ['成員訊息數日期折線圖'],
+            font: {
+              size: 25, // Adjust the font size as desired
+              weight: 'bold', // Set the font weight as desired
+            },
+          },
+          subtitle: {
+              display: true,
+              text: '點選下方方格可以選取要去除的線'
+            }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Message Count',
+            },
+            beginAtZero: true,
+          },
+        },
+        legend: {
+          display: true,
+          position: 'bottom', // Position the legend at the bottom
+          labels: {
+            font: {
+              size: 30, // Adjust the font size as desired
+            }
+          }
+        },
+        layout: {
+          padding: {
+            top: 10, // Adjust the top padding value between the chart and the title
+            bottom: 10, // Adjust the bottom padding value between the chart and the legend
+            left: 10,
+            right: 10,
+            },
+          },
+      },
+    });
+  }
+
+  function visualizeWeekdayAndMember(myArr) {
+    function weekdaytochinese(weekday){
+        engdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        chinese_weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+        return chinese_weekdays[engdays.indexOf(weekday)];
+    }
+
+    const countsByWeekdayAndMember = {};
+    const weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']; // Sort the weekdays in the desired order
+
+    myArr.forEach(row => {
+    const weekday = weekdaytochinese(Object.values(row)[2]);
+    //console.log(weekday);
+    const member = Object.values(row)[5];
+    //console.log(member);
+
+    const excludedWordsRegex = /加入|結束|收回|通話|移除/;  
+
+    if (!excludedWordsRegex.test(member)){
+        if (!countsByWeekdayAndMember[member]) {
+            countsByWeekdayAndMember[member] = {};
+            weekdays.forEach(day => {
+            countsByWeekdayAndMember[member][day] = 0;
+            });
+        }}
+    if (!excludedWordsRegex.test(member)){
+        countsByWeekdayAndMember[member][weekday]++;
+        }
+    });
+    
+  const datasets = Object.keys(countsByWeekdayAndMember).map(member => {
+    const data = weekdays.map(weekday => countsByWeekdayAndMember[member][weekday]);
+    return {
+      label: member,
+      data: data,
+      borderColor: randomColor(), // Generate a random color for each member line
+      borderWidth: 1.3,
+      fill: false,
+    };
+  });
+
+  const ctx = document.getElementById('messageCountByWeekdayChart').getContext('2d');
+  lineChart3 = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: weekdays,
+      datasets: datasets,
+    },
+    options: {
+      aspectRatio: 1.5,
+      plugins: {
+        title: {
+          display: true,
+          text: ['星期訊息折線圖'],
+          font: {
+            size: 25, // Adjust the font size as desired
+            weight: 'bold', // Set the font weight as desired
+            },
+          },
+          subtitle: {
+              display: true,
+              text: '點選下方方格可以選取要去除的線'
+            }
+        },
+
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Weekday',
+          },
+          ticks: {
+            // Adjust tick font size and baseline alignment as desired
+            font: {
+              size: 12,
+              weight: 'bold',
+            },
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Message Count',
+          },
+          beginAtZero: true,
+          ticks: {
+            // Adjust tick font size as desired
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+  function visualizeAvrWordCountByMember(myArr) {
+    const countsByMember = {};
+    const wordCountsByMember = {}; // Object to store word counts
+
+    myArr.forEach(row => {
+        const member = Object.values(row)[5];
+        const text = Object.values(row)[6]; // Get the value from the "Text" column directly
+
+        if (member !== undefined) {
+            if (!member.includes("Auto-reply") && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")){
+                if (!countsByMember[member]) {
+                    countsByMember[member] = 0;
+                    wordCountsByMember[member] = 0; // Initialize word count to 0
+        }}
+
+            if (!member.includes("Auto-reply") && !member.includes("收回訊息") && !member.includes("加入") && !member.includes("通話") && !member.includes("移除") && !member.includes("結束")) {
+                if (!text.includes("http")){
+                    countsByMember[member]++;
+                    // Calculate the word count by splitting the text by whitespace and counting the number of words
+                    wordCountsByMember[member] += text.trim().length; 
+                    //if (member === "123"){console.log("count: " + countsByMember[member] + "wordcount" + wordCountsByMember[member])}; 
+                }
+            }
+        }
+    });
+
+        const members = Object.keys(countsByMember);
+        //console.log("Words: " + wordCountsByMember["123"]);
+        //console.log("messages: " + countsByMember["123"]);
+        const avgWordCounts = members.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
+
+        const sortedMembers = members.sort((a, b) => countsByMember[b] - countsByMember[a]);
+        const sortedAvgWordCounts = sortedMembers.map(member => Math.round(wordCountsByMember[member] / countsByMember[member]));
+  
+        console.log("Member: " + sortedMembers);
+        console.log("Total Count: " + Object.values(countsByMember));
+        console.log("Average Word Count: " + sortedAvgWordCounts);
+        //console.log("Member: " + members);
+        //console.log("Count: " + messageCounts);
+        //console.log("Average Word Count: " + avgWordCounts);
+        //const sortedMembers = members.sort((a, b) => wordCountsByMember[b] - wordCountsByMember[a]);
+        //const sortedWordCounts = sortedMembers.map(member => wordCountsByMember[member]);
+
+        const ctx = document.getElementById('averageWordCountByMemberChart').getContext('2d');
+        barChart3 = new Chart(ctx, {
+            type: 'bar',
+            data: {
+            labels: sortedMembers,
+            datasets: [
+                {
+                label: '平均字數',
+                data: sortedAvgWordCounts,
+                backgroundColor: 'rgba(192,75,75, 0.2)', // Green color
+                borderColor: 'rgba(192,75,75, 1)',
+                borderWidth: 1,
+                },
+            ],
+            },
+            options: {
+            plugins: {
+                title: {
+                display: true,
+                text: '每則訊息平均字數',
+                font: {
+                    size: 25, // Adjust the font size as desired
+                    weight: 'bold', // Set the font weight as desired
+                },
+                },
+                subtitle: {
+                display: true,
+                text: '不包含網址'
+                }
+            },
+            scales: {
+                x: {
+                title: {
+                    display: true,
+                    text: 'Member',
+                },
+                },
+                y: {
+                title: {
+                    display: true,
+                    text: 'Average Word Count',
+                },
+                beginAtZero: true,
+                },
+            },
+            },
+        });
+        }
+    
+  function generateColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = (i / count) * 360;
+      const color = `hsl(${hue}, 100%, 50%)`;
+      colors.push(color);
+    }
+    return colors;
+  }
+    
+    // Function to update charts based on the selected date
+    loadChatData(function(myArr) {
+    visualizeMessageCountByDate(myArr);
+    visualizeMessageCountByMember(myArr);
+    visualizeMessageCountByDateAndMember(myArr);
+    visualizeMessageCountSticker(myArr);
+    visualizeWeekdayAndMember(myArr);
+    visualizeAvrWordCountByMember(myArr)
+
+    // Event listener for the date picker change event
+    document.getElementById('cfbutton').addEventListener('click', function() {
+        const startDate = document.getElementById('datePicker').value;
+        const endDate = document.getElementById('datePickerEnd').value;
+        console.log("slect start: " + startDate + "typeof: " + typeof(startDate));
+        console.log("select end: " + endDate + "typeof: " + typeof(endDate));
+        //const selectedDate = event.target.value;
+        document.getElementById("startdate").innerHTML = startDate;
+        document.getElementById("enddate").innerHTML = endDate;
+        
+        destroyCharts();
+
+    // Filter the chat data based on the selected date
+        let filteredData = [];
+        //----Old Version
+        myArr.forEach(val => {
+            if(Object.values(val)[4] >= startDate &&Object.values(val)[4] <= endDate){
+            //console.log(val);
+            filteredData.push(val);};            
+            });
+
+        // Update the charts with the filtered data
+        visualizeMessageCountByDate(filteredData);  
+        visualizeMessageCountByMember(filteredData);
+        visualizeMessageCountByDateAndMember(filteredData);
+        visualizeMessageCountSticker(filteredData);
+        visualizeWeekdayAndMember(filteredData);
+        visualizeAvrWordCountByMember(filteredData)
+    });
+});
+  </script>
+</body>
+</html>
