@@ -19,14 +19,14 @@
     }
 
     #author {
-      font-size: 16px; /* Adjust the font size as desired */
+      font-size: 20px; /* Adjust the font size as desired */
 
     }
     #title {
       display: flex;
       margin-right: auto;
       margin-left: auto;
-      font-size: 38px; /* Set the font size as desired */
+      font-size: 42px; /* Set the font size as desired */
       font-weight: bold; /* Set the font weight as desired */
     }
 
@@ -46,7 +46,7 @@
       justify-content: center;
       align-items: center;
       /*margin-bottom: 20px;*/
-      font-size: 20px;
+      font-size: 25px;
       margin: 10px 0;
     }
 
@@ -61,18 +61,18 @@
     #datePicker {
       width: 200px; /* Adjust the width as desired */
       padding: 6px; /* Adjust padding as desired */
-      font-size: 15px; /* Adjust font size as desired */
+      font-size: 18px; /* Adjust font size as desired */
     }
     #datePickerEnd {
       width: 200px; /* Adjust the width as desired */
       padding: 6px; /* Adjust padding as desired */
-      font-size: 15px; /* Adjust font size as desired */
+      font-size: 18px; /* Adjust font size as desired */
     }
     #dateDescription {
         text-align: center;
         justify-content: center;
         align-items: center;
-        font-size: 20px;
+        font-size: 25px;
     }
     #confirmbtn {
         display: flex;
@@ -81,7 +81,7 @@
     }
     #cfbutton {
         padding: 10px 20px;
-        font-size: 16px;
+        font-size: 20px;
         background-color: #0b1442; /* Set your desired color */
         color: #fff;
         border: none;
@@ -123,7 +123,7 @@
         margin: auto;
         margin: auto;
         height: 80px;
-        font-size: 16px; 
+        font-size: 20px; 
     }
     #MemBtn {
         display: block;
@@ -131,7 +131,7 @@
         background-color: #0b1442;
         color: white;
         padding: 10px 20px;
-        font-size: 16px;
+        font-size: 20px;
         border: none;
         cursor: pointer;
         border: none;
@@ -139,11 +139,11 @@
     }
     #sentence {
         text-align: center;
-        margin-top: 8px;
+        margin-top: 14px;
     }
     #selectedMem {
         text-align: center;
-        margin-top: 10px;
+        margin-top: 16px;
     }
   </style>
 </head>
@@ -300,7 +300,7 @@
             display: true,
             text: '群組總訊息數趨勢',
             font: {
-              size: 25, // Adjust the font size as desired
+              size: 30, // Adjust the font size as desired
               weight: 'bold', // Set the font weight as desired
             },
           },
@@ -417,7 +417,7 @@
             display: true,
             text: '成員訊息數量圖',
             font: {
-              size: 25, // Adjust the font size as desired
+              size: 30, // Adjust the font size as desired
               weight: 'bold', // Set the font weight as desired
             },
           },
@@ -522,7 +522,7 @@
             display: true,
             text: '成員貼圖數量圖',
             font: {
-              size: 25, // Adjust the font size as desired
+              size: 30, // Adjust the font size as desired
               weight: 'bold', // Set the font weight as desired
             },
           },
@@ -658,7 +658,7 @@
     //const members = Object.keys(memberCounts);
     //const colors = generateColors(members.length);
 
-    Chart.defaults.font.size = 20;
+    Chart.defaults.font.size = 25;
     lineChart2 = new Chart(ctx, {
       type: 'line',
       data: {
@@ -672,7 +672,7 @@
             display: true,
             text: ['成員訊息數日期折線圖'],
             font: {
-              size: 25, // Adjust the font size as desired
+              size: 30, // Adjust the font size as desired
               weight: 'bold', // Set the font weight as desired
             },
           },
@@ -772,7 +772,7 @@
           display: true,
           text: ['星期訊息折線圖'],
           font: {
-            size: 25, // Adjust the font size as desired
+            size: 30, // Adjust the font size as desired
             weight: 'bold', // Set the font weight as desired
             },
           },
@@ -878,7 +878,7 @@
                 display: true,
                 text: '每則訊息平均字數',
                 font: {
-                    size: 25, // Adjust the font size as desired
+                    size: 30, // Adjust the font size as desired
                     weight: 'bold', // Set the font weight as desired
                 },
                 },
