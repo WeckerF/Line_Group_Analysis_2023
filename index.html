@@ -118,6 +118,33 @@
         border: solid 3px rgba(158, 194, 214, 1);
         background: white;        
     }
+    #selectNumber {
+        display: block;
+        margin: auto;
+        margin: auto;
+        height: 80px;
+        font-size: 16px; 
+    }
+    #MemBtn {
+        display: block;
+        margin: 10px auto;
+        background-color: #0b1442;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        border: none;
+        border-radius: 20px;
+    }
+    #sentence {
+        text-align: center;
+        margin-top: 8px;
+    }
+    #selectedMem {
+        text-align: center;
+        margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -130,7 +157,7 @@
     <div id="datePickerBlock">
         <label for="datePicker">選擇統計起始日期 (初始及最小值為2023/01/14): </label>
         <input type="date" id="datePicker" min="2023-01-14" max="2023-12-31" value="2023-01-14">
-        <label for="datePickerEnd">選擇統計結束日期 (初始及最小值為2023/12/31): </label>
+        <label for="datePickerEnd">選擇統計結束日期 (初始及最大值為2023/12/31): </label>
         <input type="date" id="datePickerEnd" min="2023-01-14" max="2023-12-31" value="2023-12-31">
     </div>   
   </div>
@@ -145,11 +172,20 @@
         <span> ~ </span>
         <span id="enddate">2023-12-30</span><br>
         <span>聊天天數: </span>
-        <span id="num_date"></span><br>
-        <span>期間發言成員: </span>
+        <span id="num_date" style="background-color:#7f888e; color:#edead4"></span><br><br>
         <span id="showMem"></span>
     </p>
   </div>
+
+  <div>
+    <select id="selectNumber" multiple>
+        <option>全選</option>
+    </select>
+    <button id = "MemBtn" type="button">選擇成員</button><p id="sentence">(只在最後一張圖作用，可複選也可不選)</p>
+    <p id="selectedMem"></p>
+    
+  </div>
+  
   <br><br><br><br>
 
   <div id="chartContainer">
@@ -249,7 +285,7 @@
         labels: dates,
         datasets: [
           {
-            label: 'Message Count',
+            label: '訊息數(則)',
             data: messageCounts,
             backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color
             borderColor: 'rgba(54, 162, 235, 1)',
@@ -299,6 +335,48 @@
   
 
   function visualizeMessageCountByMember(myArr) {
+    //For member selection dropdown and Description
+    const excludedWordsRegex = /加入|結束|收回|通話|移除/;
+    let all_member = [];
+    myArr.forEach(val => {
+        if (!excludedWordsRegex.test(Object.values(val)[5])){
+            if (Object.values(val)[5] !== undefined){
+                all_member.push(Object.values(val)[5]);}
+            }
+      });
+    //print All member
+    const uniquesMember = [...new Set(all_member)];
+    console.log(uniquesMember);
+    document.getElementById("showMem").innerHTML = uniquesMember;
+    showMem.textContent = '此期間聊天成員: ' + uniquesMember.join(', ');
+    //print date count
+    let dateLabels = [];
+    myArr.forEach(val => {
+        if (!excludedWordsRegex.test(Object.values(val)[4])){
+            if (Object.values(val)[4] !== undefined){
+                dateLabels.push(Object.values(val)[4]);}
+            }
+      });
+    const uniquesdateLabels = [...new Set(dateLabels)];
+    //const num_dates = uniquesdateLabels.length;
+    document.getElementById("num_date").innerHTML = uniquesdateLabels.length;
+    //console.log(uniquesdateLabels);   
+    
+    //Dropdown Multiselection 
+    var dpselect = document.getElementById("selectNumber");
+	var options = Object.values(uniquesMember);
+    
+	for(var i = 0; i < options.length; i++) {
+		var opt = options[i];
+		var el = document.createElement("option");
+		el.textContent = opt;
+		el.value = opt;
+        //console.log(el);
+		dpselect.add(el);
+	}
+
+
+    //Barchart related
     const countsByMember = {};
     myArr.forEach(row => {
       const member = Object.values(row)[5]; // Get the value from the "Member" column directly
@@ -324,7 +402,7 @@
         labels: sortedMembers,
         datasets: [
           {
-            label: 'Message Count',
+            label: '訊息數(則)',
             data: sortedMessageCounts,
             backgroundColor: 'rgba(75, 192, 192, 0.2)', // Green color
             borderColor: 'rgba(75, 192, 192, 1)',
@@ -429,7 +507,7 @@
         labels: sortedMembers,
         datasets: [
           {
-            label: 'Sticker Count',
+            label: '貼圖數',
             data: sortedMessageCounts,
             backgroundColor: 'rgba(134, 197, 134, 0.8)', // Green color
             borderColor: 'rgba(134, 197, 134, 1)',
@@ -516,12 +594,12 @@
                 all_member.push(Object.values(val)[5]);}
             }
       });
-    
-    const uniquesMember = [...new Set(all_member)];
-    console.log(uniquesMember);
-    document.getElementById("showMem").innerHTML = uniquesMember;
 
-    //const dateLabels = [];
+    const uniquesMember = [...new Set(all_member)];
+    //console.log(uniquesMember);
+
+
+    //Dates
     let dateLabels = [];
     myArr.forEach(val => {
         if (!excludedWordsRegex.test(Object.values(val)[4])){
@@ -530,9 +608,8 @@
             }
       });
     const uniquesdateLabels = [...new Set(dateLabels)];
-    const num_dates = uniquesdateLabels.length;
-    document.getElementById("num_date").innerHTML = num_dates;
-    console.log(uniquesdateLabels);    
+    //console.log(uniquesdateLabels);   
+    
 
     const countsByDateAndMember = {};
  
@@ -608,7 +685,7 @@
           x: {
             title: {
               display: true,
-              text: 'Date',
+              text: '日期',
             },
           },
           y: {
@@ -877,6 +954,67 @@
         visualizeWeekdayAndMember(filteredData);
         visualizeAvrWordCountByMember(filteredData)
     });
+    
+    //Member Selection Dropdown
+    document.getElementById('MemBtn').addEventListener('click', function() {
+        const startDate = document.getElementById('datePicker').value;
+        const endDate = document.getElementById('datePickerEnd').value;
+        console.log("slect start: " + startDate + "typeof: " + typeof(startDate));
+        console.log("select end: " + endDate + "typeof: " + typeof(endDate));
+        //const selectedDate = event.target.value;
+        document.getElementById("startdate").innerHTML = startDate;
+        document.getElementById("enddate").innerHTML = endDate;
+        
+        destroyCharts();
+
+    // Filter the chat data based on the selected date
+        let filteredData = [];
+        //----Old Version
+        myArr.forEach(val => {
+            if(Object.values(val)[4] >= startDate &&Object.values(val)[4] <= endDate){
+            //console.log(val);
+            filteredData.push(val);};            
+            });
+
+        // Update the charts with the filtered data
+        visualizeMessageCountByDate(filteredData);  
+        visualizeMessageCountByMember(filteredData);
+        visualizeMessageCountByDateAndMember(filteredData);
+        visualizeMessageCountSticker(filteredData);
+        visualizeWeekdayAndMember(filteredData);
+        visualizeAvrWordCountByMember(filteredData)
+    });
+
+    MemBtn.addEventListener('click', function() {
+        const startDate = document.getElementById('datePicker').value;
+        const endDate = document.getElementById('datePickerEnd').value;
+        const selectedOptions = Array.from(selectNumber.selectedOptions);
+        const selectedMembers = selectedOptions.map(option => option.value);
+        let filteredData = [];
+            myArr.forEach(val => {
+                if(Object.values(val)[4] >= startDate &&Object.values(val)[4] <= endDate){
+                //console.log(val);
+                filteredData.push(val);};            
+                });
+
+    //const filteredData = myArr.filter(row => selectedMembers.includes(Object.values(row)[5]));
+        console.log(selectedMembers[0]);
+        if (selectedMembers[0] === "全選") {
+            if (lineChart2) {
+                lineChart2.destroy();
+                lineChart2 = null;}
+        visualizeMessageCountByDateAndMember(filteredData); // Display chart for all members
+        selectedMem.textContent = '所選成員: 全部';
+        } else {
+        const filteredDataMem = filteredData.filter(row => selectedMembers.includes(Object.values(row)[5]));
+        if (lineChart2) {
+                lineChart2.destroy();
+                lineChart2 = null;}
+        visualizeMessageCountByDateAndMember(filteredDataMem); // Display chart for selected members
+        selectedMem.textContent = '所選成員: ' + selectedMembers.join(', ');
+        }
+    });
+
 });
   </script>
 </body>
