@@ -873,6 +873,7 @@
             ],
             },
             options: {
+	    scaleShowValues: true,
             plugins: {
                 title: {
                 display: true,
@@ -889,6 +890,9 @@
             },
             scales: {
                 x: {
+		ticks: {
+                autoSkip: false
+                },
                 title: {
                     display: true,
                     text: 'Member',
